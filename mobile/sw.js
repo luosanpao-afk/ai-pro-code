@@ -1,4 +1,4 @@
-const CACHE_NAME = "heart-notes-mobile-v1";
+const CACHE_NAME = "heart-notes-mobile-v2";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
