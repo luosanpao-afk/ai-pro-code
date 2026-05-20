@@ -91,18 +91,19 @@
       left: var(--title-x, 50%);
       top: var(--title-y, 50%);
       z-index: 5;
-      width: min(66vw, 292px);
-      padding: 11px 14px;
+      width: min(46vw, 210px);
+      padding: 10px 12px;
       border: 1px solid rgba(255, 255, 255, 0.6);
       border-radius: 8px;
       background: rgba(255, 77, 141, 0.94);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
       color: white;
-      font-size: clamp(19px, 5.25vw, 27px);
+      font-size: clamp(18px, 5vw, 24px);
       font-weight: 800;
       line-height: 1.22;
       text-align: center;
       letter-spacing: 0;
+      white-space: pre-line;
       transform: translate(-50%, -50%) scale(0.88);
       opacity: 0;
       animation: titleIn 0.72s cubic-bezier(0.17, 0.84, 0.28, 1) forwards;
@@ -174,7 +175,7 @@
   <script>
     const COUNT = 160;
     const POPUP_INTERVAL = 120;
-    const TITLE_TEXT = "心之所向  爱之所往";
+    const TITLE_TEXT = "心之所向\n爱之所往";
     const stage = document.querySelector("#stage");
     const replayButton = document.querySelector("#replay");
 
