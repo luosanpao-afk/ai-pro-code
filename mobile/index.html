@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10131f">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>心之所向 爱之所往</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10131f;
+      --ink: #f8fafc;
+      --panel: rgba(255, 255, 255, 0.92);
+      --shadow: rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 16%, rgba(255, 96, 142, 0.24), transparent 32%),
+        linear-gradient(180deg, #111827 0%, #0b1020 48%, #080b14 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .note {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: grid;
+      place-items: center;
+      width: min(42vw, 168px);
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 7px;
+      box-shadow: 0 10px 24px var(--shadow);
+      color: #42213b;
+      font-size: clamp(12px, 3.35vw, 15px);
+      font-weight: 700;
+      line-height: 1.22;
+      text-align: center;
+      letter-spacing: 0;
+      transform: translate3d(var(--sx), var(--sy), 0) rotate(var(--rot)) scale(0.82);
+      opacity: 0;
+      will-change: transform, opacity;
+      animation: flyIn 1.45s cubic-bezier(0.17, 0.84, 0.28, 1) forwards;
+      animation-delay: var(--delay);
+    }
+
+    .note::before {
+      position: absolute;
+      top: 0;
+      left: 14%;
+      width: 58%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.56);
+      content: "";
+    }
+
+    .note:nth-child(7n + 1) { background: #ffd6e8; }
+    .note:nth-child(7n + 2) { background: #d7f5ff; color: #18394a; }
+    .note:nth-child(7n + 3) { background: #dfffe2; color: #263b24; }
+    .note:nth-child(7n + 4) { background: #fff0b8; color: #4a2c15; }
+    .note:nth-child(7n + 5) { background: #ead7ff; color: #40235f; }
+    .note:nth-child(7n + 6) { background: #ffe0cc; color: #4a2c15; }
+    .note:nth-child(7n) { background: #f8c8dc; }
+
+    .title {
+      position: absolute;
+      left: 50%;
+      top: 49%;
+      width: min(82vw, 380px);
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 8px;
+      background: rgba(255, 77, 141, 0.94);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+      color: white;
+      font-size: clamp(22px, 6vw, 32px);
+      font-weight: 800;
+      line-height: 1.22;
+      text-align: center;
+      letter-spacing: 0;
+      transform: translate(-50%, -50%) scale(0.88);
+      opacity: 0;
+      animation: titleIn 0.72s cubic-bezier(0.17, 0.84, 0.28, 1) forwards;
+    }
+
+    .toolbar {
+      position: fixed;
+      right: max(16px, env(safe-area-inset-right));
+      bottom: max(18px, env(safe-area-inset-bottom));
+      z-index: 10;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.13);
+      color: white;
+      font-size: 22px;
+      line-height: 1;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    @keyframes flyIn {
+      0% {
+        transform: translate3d(var(--sx), var(--sy), 0) rotate(var(--rot)) scale(0.82);
+        opacity: 0;
+      }
+      58% {
+        opacity: 0.97;
+      }
+      100% {
+        transform: translate3d(var(--tx), var(--ty), 0) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes titleIn {
+      to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @media (min-width: 720px) {
+      .note {
+        width: 190px;
+        min-height: 52px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="stage" aria-label="心形便签动画"></main>
+  <div class="toolbar">
+    <button id="replay" type="button" aria-label="重播">↻</button>
+  </div>
+
+  <script>
+    const COUNT = 160;
+    const POPUP_INTERVAL = 120;
+    const TITLE_TEXT = "心之所向  爱之所往";
+    const stage = document.querySelector("#stage");
+    const replayButton = document.querySelector("#replay");
+
+    const seeds = [
+      "多喝水哦", "保持好心情", "好好爱自己", "别熬夜了", "今天也要加油",
+      "我想你了", "想抱抱你", "等你回家", "有我在呢", "慢慢来就好",
+      "记得吃饭呀", "别太累了", "今天辛苦啦", "你已经很棒了", "我一直都在",
+      "不开心就抱抱", "想听你说话", "晚点也没关系", "我陪着你呀", "不要硬撑",
+      "把烦恼给我", "早点休息呀", "梦里也见你", "你笑起来最好看", "今天也喜欢你",
+      "想和你散步", "给你一点甜", "要照顾好自己", "天气凉多穿点", "我在想你呢",
+      "见到你就开心", "想牵你的手", "你是我的偏爱", "抱抱我的小朋友", "别怕我在",
+      "心情不好找我", "想把温柔给你", "你不用逞强", "我永远站你这边", "今晚早点睡",
+      "给你充充电", "想陪你发呆", "喜欢你的认真", "喜欢你的可爱", "你值得被好好爱",
+      "把开心分你一半", "我会慢慢陪你", "今天也很想见你", "你一出现就安心", "别偷偷难过",
+      "累了就靠一靠", "我来哄你呀", "亲亲就不累啦", "想给你热奶茶", "我最偏心你",
+      "我会记得你的好", "你不用完美", "你怎样都可爱", "想听你碎碎念", "被你需要很开心",
+      "给你满格安全感", "今天要被宠爱", "你是我的小确幸", "喜欢和你在一起", "想和你看日落",
+      "我会好好珍惜你", "你负责开心就好", "想把好运给你", "所有温柔都给你", "想陪你很久很久",
+      "你在我心尖上", "不许自己偷偷委屈", "有事第一时间找我", "今晚月色很适合想你", "抱一下就好了",
+      "我喜欢现在的你", "也喜欢明天的你", "想成为你的依靠", "我的温柔只给你", "每天都想靠近你",
+      "你是我认真选择的人", "我们慢慢来", "我会一直偏爱你", "想把快乐攒给你", "今天也要被我喜欢",
+      "你的消息我都期待", "不忙也想找你", "想和你一起吃饭", "我会接住你的情绪", "你不用一个人扛",
+      "我在你身后呢", "给你一个大大的抱抱", "你值得所有温柔", "想把星星送给你", "我喜欢你很久很久",
+    ];
+
+    const prefixes = ["今天", "明天", "每一天", "想你的时候", "见到你的时候", "睡觉以前", "醒来以后", "你累了的时候", "你难过的时候", "你开心的时候"];
+    const suffixes = ["都想抱抱你", "都想陪着你", "都把温柔给你", "都希望你开心", "都想听你说话", "都想牵你的手", "都想给你安全感", "都想和你慢慢来"];
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function makeTexts(count) {
+      const phrases = [...new Set(seeds)];
+      for (const prefix of prefixes) {
+        for (const suffix of suffixes) {
+          phrases.push(`${prefix}${suffix}`);
+        }
+      }
+      return shuffle([...new Set(phrases)]).slice(0, count);
+    }
+
+    function heartPoints(count) {
+      const noteW = Math.min(window.innerWidth * 0.42, window.innerWidth >= 720 ? 190 : 168);
+      const noteH = window.innerWidth >= 720 ? 52 : 44;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const raw = [];
+
+      for (let i = 0; i < count; i += 1) {
+        const t = (i / count) * Math.PI * 2;
+        const x = 16 * Math.sin(t) ** 3;
+        const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        raw.push({ x, y });
+      }
+
+      const xs = raw.map((point) => point.x);
+      const ys = raw.map((point) => point.y);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+      const usableW = width - noteW - 16;
+      const usableH = height - noteH - 64;
+      const scale = Math.min(usableW / (maxX - minX), usableH / (maxY - minY));
+      const heartW = (maxX - minX) * scale;
+      const heartH = (maxY - minY) * scale;
+      const baseX = (width - heartW - noteW) / 2;
+      const baseY = (height - heartH - noteH) / 2 - 8;
+
+      return raw.map((point) => ({
+        x: Math.max(0, Math.min(width - noteW, baseX + (point.x - minX) * scale)),
+        y: Math.max(0, Math.min(height - noteH, baseY + heartH - (point.y - minY) * scale)),
+      }));
+    }
+
+    function startPoint(index) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const side = index % 4;
+      if (side === 0) return { x: Math.random() * width, y: height + 80 };
+      if (side === 1) return { x: width + 120, y: Math.random() * height };
+      if (side === 2) return { x: Math.random() * width, y: -90 };
+      return { x: -140, y: Math.random() * height };
+    }
+
+    function play() {
+      stage.replaceChildren();
+      const points = heartPoints(COUNT);
+      const texts = makeTexts(COUNT);
+
+      points.forEach((point, index) => {
+        const note = document.createElement("div");
+        const start = startPoint(index);
+        note.className = "note";
+        note.textContent = texts[index];
+        note.style.setProperty("--sx", `${start.x}px`);
+        note.style.setProperty("--sy", `${start.y}px`);
+        note.style.setProperty("--tx", `${point.x}px`);
+        note.style.setProperty("--ty", `${point.y}px`);
+        note.style.setProperty("--rot", `${Math.random() * 24 - 12}deg`);
+        note.style.setProperty("--delay", `${index * POPUP_INTERVAL}ms`);
+        stage.appendChild(note);
+      });
+
+      window.clearTimeout(play.titleTimer);
+      play.titleTimer = window.setTimeout(() => {
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = TITLE_TEXT;
+        stage.appendChild(title);
+      }, COUNT * POPUP_INTERVAL + 1050);
+    }
+
+    replayButton.addEventListener("click", play);
+    window.addEventListener("resize", () => {
+      window.clearTimeout(play.resizeTimer);
+      play.resizeTimer = window.setTimeout(play, 250);
+    });
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    }
+
+    play();
+  </script>
+</body>
+</html>

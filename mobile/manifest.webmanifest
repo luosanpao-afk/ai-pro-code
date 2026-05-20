@@ -1,0 +1,16 @@
+{
+  "name": "心之所向 爱之所往",
+  "short_name": "爱心便签",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#10131f",
+  "theme_color": "#10131f",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
